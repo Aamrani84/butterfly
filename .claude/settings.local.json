@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(start \"c:\\\\Users\\\\hp\\\\Desktop\\\\Butterfly\\\\index.html\")",
+      "WebFetch(domain:soft-mandazi-3f7494.netlify.app)",
+      "WebFetch(domain:butterflyroyalvilla.com)",
+      "WebFetch(domain:www.butterflyroyalvilla.com)"
+    ]
+  }
+}
