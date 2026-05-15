@@ -1191,8 +1191,25 @@ async function updateStatus(id) {
       status:    sel.value,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    await syncAvailability();
     toast('Status updated ✓', 'success');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function syncAvailability() {
+  try {
+    const snap = await db.collection('reservations')
+      .where('status', 'in', ['confirmed', 'awaiting_payment'])
+      .get();
+    const ranges = [];
+    snap.forEach(function(doc) {
+      const d = doc.data();
+      if (d.checkIn && d.checkOut) {
+        ranges.push({ checkIn: d.checkIn, checkOut: d.checkOut });
+      }
+    });
+    await db.collection('settings').doc('availability').set({ ranges });
+  } catch(e) { console.warn('Availability sync failed:', e.message); }
 }
 
 async function saveNote(id) {

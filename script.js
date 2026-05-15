@@ -395,17 +395,9 @@ function loadExtraServices(db) {
 
 /* ── AVAILABILITY CALENDAR ──────────────────────── */
 function loadAvailabilityCalendar(db) {
-  db.collection('reservations')
-    .where('status', 'in', ['confirmed', 'awaiting_payment'])
-    .get()
-    .then(function (snap) {
-      var ranges = [];
-      snap.forEach(function (doc) {
-        var d = doc.data();
-        if (d.checkIn && d.checkOut) {
-          ranges.push({ checkIn: d.checkIn, checkOut: d.checkOut });
-        }
-      });
+  db.collection('settings').doc('availability').get()
+    .then(function (doc) {
+      var ranges = doc.exists ? (doc.data().ranges || []) : [];
       renderCalendar(ranges);
     })
     .catch(function () { renderCalendarFallback(); });
