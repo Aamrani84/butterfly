@@ -423,7 +423,7 @@
           <div class="pricing-card animate-in">
             <p class="pricing-season" data-en="Low Season" data-fr="Basse Saison">Low Season</p>
             <p class="pricing-period" data-en="May – Jun &nbsp;·&nbsp; Sep – Oct" data-fr="Mai – Juin &nbsp;·&nbsp; Sep – Oct">May – Jun &nbsp;·&nbsp; Sep – Oct</p>
-            <p class="pricing-rate">€799<span data-en=" / night" data-fr=" / nuit"> / night</span></p>
+            <p class="pricing-rate" id="price-low">€799<span data-en=" / night" data-fr=" / nuit"> / night</span></p>
             <ul class="pricing-features">
               <li data-en="Private chef & daily housekeeping" data-fr="Chef privé et ménage quotidien">Private chef & daily housekeeping</li>
               <li data-en="24/7 security guard" data-fr="Gardien de sécurité 24/7">24/7 security guard</li>
@@ -435,7 +435,7 @@
             <div class="pricing-badge" data-en="Most Popular" data-fr="Le Plus Demandé">Most Popular</div>
             <p class="pricing-season" data-en="High Season" data-fr="Haute Saison">High Season</p>
             <p class="pricing-period" data-en="Jul – Aug &nbsp;·&nbsp; Mar – Apr" data-fr="Juil – Août &nbsp;·&nbsp; Mar – Avr">Jul – Aug &nbsp;·&nbsp; Mar – Apr</p>
-            <p class="pricing-rate">€1,200<span data-en=" / night" data-fr=" / nuit"> / night</span></p>
+            <p class="pricing-rate" id="price-high">€1,200<span data-en=" / night" data-fr=" / nuit"> / night</span></p>
             <ul class="pricing-features">
               <li data-en="Private chef & daily housekeeping" data-fr="Chef privé et ménage quotidien">Private chef & daily housekeeping</li>
               <li data-en="24/7 security guard" data-fr="Gardien de sécurité 24/7">24/7 security guard</li>
@@ -446,7 +446,7 @@
           <div class="pricing-card animate-in">
             <p class="pricing-season" data-en="Peak Season" data-fr="Très Haute Saison">Peak Season</p>
             <p class="pricing-period" data-en="Dec – Jan &nbsp;·&nbsp; Special Events" data-fr="Déc – Jan &nbsp;·&nbsp; Événements Spéciaux">Dec – Jan &nbsp;·&nbsp; Special Events</p>
-            <p class="pricing-rate">€2,000<span data-en=" / night" data-fr=" / nuit"> / night</span></p>
+            <p class="pricing-rate" id="price-peak">€2,000<span data-en=" / night" data-fr=" / nuit"> / night</span></p>
             <ul class="pricing-features">
               <li data-en="All services included" data-fr="Tous les services inclus">All services included</li>
               <li data-en="VIP concierge service" data-fr="Service conciergerie VIP">VIP concierge service</li>
@@ -461,6 +461,20 @@
 
 
     <!-- ═══════════════════════════════════════════
+         SPECIAL OFFERS (dynamic — loaded from Firebase)
+    ═══════════════════════════════════════════ -->
+    <section id="offers-section" class="section bg-cream" style="display:none">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-eyebrow" data-en="Special Offers" data-fr="Offres Spéciales">Special Offers</p>
+          <h2 data-en="Exclusive Promotions" data-fr="Promotions Exclusives">Exclusive Promotions</h2>
+        </div>
+        <div class="offers-grid" id="offers-grid"></div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════
          BOOKING
     ═══════════════════════════════════════════ -->
     <section id="booking" class="section bg-cream">
@@ -468,8 +482,24 @@
         <div class="section-header">
           <p class="section-eyebrow" data-en="Direct Booking" data-fr="Réservation Directe">Direct Booking</p>
           <h2 data-en="Book Your Stay" data-fr="Réservez Votre Séjour">Book Your Stay</h2>
-          <p class="section-sub" data-en="Fill in your details and your booking request will be sent directly to the owner via WhatsApp. No middleman. No hidden fees." data-fr="Remplissez vos coordonnées et votre demande de réservation sera envoyée directement au propriétaire via WhatsApp. Sans intermédiaire. Sans frais cachés.">Fill in your details and your booking request will be sent directly to the owner via WhatsApp. No middleman. No hidden fees.</p>
+          <p class="section-sub" data-en="Check availability below, then fill in your details. Your request will be sent directly via WhatsApp and our team will confirm your booking." data-fr="Vérifiez les disponibilités ci-dessous, puis remplissez vos coordonnées. Votre demande sera envoyée directement via WhatsApp.">Check availability below, then fill in your details. Your request will be sent directly via WhatsApp and our team will confirm your booking.</p>
         </div>
+
+        <!-- Availability Calendar -->
+        <div class="avail-calendar-wrap">
+          <div class="avail-calendar-header">
+            <h3 data-en="Availability Calendar" data-fr="Calendrier de Disponibilité">Availability Calendar</h3>
+            <div class="avail-legend">
+              <span class="legend-item legend-available" data-en="Available" data-fr="Disponible">Available</span>
+              <span class="legend-item legend-booked"    data-en="Booked"    data-fr="Réservé">Booked</span>
+              <span class="legend-item legend-today"     data-en="Today"     data-fr="Aujourd'hui">Today</span>
+            </div>
+          </div>
+          <div id="avail-calendar" class="avail-calendar">
+            <p class="avail-loading" data-en="Loading availability…" data-fr="Chargement…">Loading availability…</p>
+          </div>
+        </div>
+
         <div class="booking-layout">
           <form id="booking-form" class="booking-form" novalidate>
             <div class="form-row">
@@ -544,7 +574,21 @@
               </div>
             </div>
           </aside>
+        </div><!-- /.booking-layout -->
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════
+         EXTRA SERVICES (dynamic — loaded from Firebase)
+    ═══════════════════════════════════════════ -->
+    <section id="extra-services-section" class="section bg-dark" style="display:none">
+      <div class="container">
+        <div class="section-header light">
+          <p class="section-eyebrow" data-en="Additional Services" data-fr="Services Supplémentaires">Additional Services</p>
+          <h2 data-en="Enhanced Your Experience" data-fr="Enrichissez Votre Séjour">Enhance Your Experience</h2>
         </div>
+        <div class="amenities-grid" id="extra-services-grid"></div>
       </div>
     </section>
 
@@ -708,6 +752,16 @@
     </div>
     <p id="lb-caption" class="lb-caption"></p>
   </div>
+
+  <!-- Firebase (public read only — for calendar and dynamic content) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <!-- EmailJS (for booking form email notification) -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <!-- Villa config (Firebase + EmailJS credentials) -->
+  <script src="firebase-config.js"></script>
 
   <script src="script.js"></script>
 </body>

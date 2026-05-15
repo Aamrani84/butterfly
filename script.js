@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
     currentLang = lang;
     document.documentElement.lang = lang;
 
-    // Update all elements with data-en / data-fr attributes
     document.querySelectorAll('[data-en], [data-fr]').forEach(function (el) {
       const val = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
       if (!val) return;
@@ -26,22 +25,18 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Highlight active language button
     document.querySelectorAll('.lang-btn').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
     });
   };
 
-  // Initialize with English
   switchLang('en');
 
 
   /* ── HEADER SCROLL EFFECT ───────────────────── */
   var header = document.getElementById('site-header');
   function updateHeader() {
-    if (header) {
-      header.classList.toggle('scrolled', window.scrollY > 80);
-    }
+    if (header) header.classList.toggle('scrolled', window.scrollY > 80);
   }
   window.addEventListener('scroll', updateHeader, { passive: true });
   updateHeader();
@@ -58,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function () {
       navMenu.classList.toggle('is-open', !isOpen);
     });
 
-    // Close on any nav link or button click
     navMenu.querySelectorAll('a, button').forEach(function (el) {
       el.addEventListener('click', function () {
         navToggle.setAttribute('aria-expanded', 'false');
@@ -66,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    // Close on resize past mobile breakpoint
     window.addEventListener('resize', function () {
       if (window.innerWidth > 720) {
         navToggle.setAttribute('aria-expanded', 'false');
@@ -89,21 +82,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   /* ── SCROLL ANIMATIONS ──────────────────────── */
-  var observer = new IntersectionObserver(function (entries) {
+  window._animObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
+        window._animObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.12 });
 
   document.querySelectorAll('.animate-in').forEach(function (el) {
-    observer.observe(el);
+    window._animObserver.observe(el);
   });
 
 
-  /* ── GALLERY PREVIEW — set background images ── */
+  /* ── GALLERY PREVIEW ────────────────────────── */
   var previewImages = [
     { src: 'WhatsApp Image 2026-04-06 at 01.49.09.jpeg', title: 'Pool & Garden' },
     { src: 'marrakech-villa-butterfly-12.jpg',           title: 'Luxury Interior' },
@@ -133,7 +126,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.style.overflow = '';
   };
 
-  // Close when clicking the dark backdrop
   galleryModal.addEventListener('click', function (e) {
     if (e.target === galleryModal) closeGallery();
   });
@@ -169,14 +161,12 @@ document.addEventListener('DOMContentLoaded', function () {
     showLightboxAt(lbIndex + dir);
   };
 
-  // Open from the gallery preview (outside the modal)
   window.openPreviewLightbox = function (index) {
     lbImages = previewImages;
     showLightboxAt(index);
     openLightbox();
   };
 
-  // Open from within the gallery modal
   window.openModalLightbox = function (index) {
     var items = document.querySelectorAll('#gallery-modal-grid .gm-item');
     lbImages = Array.from(items).map(function (el) {
@@ -186,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function () {
     openLightbox();
   };
 
-  // Set onclick for preview items
   document.querySelectorAll('#gallery-preview .gp-item').forEach(function (item) {
     var idx = parseInt(item.getAttribute('data-index'), 10);
     item.addEventListener('click', function () {
@@ -194,12 +183,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Close lightbox on backdrop click
   lightbox.addEventListener('click', function (e) {
     if (e.target === lightbox) closeLightbox();
   });
 
-  // Keyboard navigation
   document.addEventListener('keydown', function (e) {
     if (lightbox.classList.contains('is-open')) {
       if (e.key === 'ArrowLeft')  lbChange(-1);
@@ -211,12 +198,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
 
-  /* ── BOOKING FORM — Send to WhatsApp ─────────── */
+  /* ── BOOKING FORM — WhatsApp + Firebase + EmailJS ─ */
   var form = document.getElementById('booking-form');
 
   if (form) {
-    // Set minimum date to today
-    var today = new Date().toISOString().split('T')[0];
+    var today         = new Date().toISOString().split('T')[0];
     var checkinInput  = document.getElementById('b-checkin');
     var checkoutInput = document.getElementById('b-checkout');
 
@@ -241,39 +227,262 @@ document.addEventListener('DOMContentLoaded', function () {
       var occasion = document.getElementById('b-occasion').value;
       var message  = document.getElementById('b-message').value.trim();
 
-      // Validate required fields
       if (!name || !phone || !checkin || !checkout || !guests) {
-        var msg = currentLang === 'fr'
+        alert(currentLang === 'fr'
           ? 'Veuillez remplir tous les champs obligatoires (*).'
-          : 'Please fill in all required fields (*).';
-        alert(msg);
+          : 'Please fill in all required fields (*).');
         return;
       }
-
       if (checkout <= checkin) {
-        var msg2 = currentLang === 'fr'
-          ? 'La date de départ doit être après la date d\'arrivée.'
-          : 'Check-out date must be after check-in date.';
-        alert(msg2);
+        alert(currentLang === 'fr'
+          ? "La date de départ doit être après la date d'arrivée."
+          : 'Check-out date must be after check-in date.');
         return;
       }
 
-      // Build WhatsApp message
       var nights = Math.round((new Date(checkout) - new Date(checkin)) / 86400000);
-      var text = 'Hello! I would like to book Villa Butterfly Marrakech.\n\n';
-      text += '\uD83D\uDC64 Name: '        + name      + '\n';
-      text += '\uD83D\uDCDE Phone: '        + phone     + '\n';
-      text += '\uD83D\uDCC5 Check-in: '    + checkin   + '\n';
-      text += '\uD83D\uDCC5 Check-out: '   + checkout  + '\n';
-      text += '\uD83C\uDF19 Duration: '    + nights + ' night' + (nights > 1 ? 's' : '') + '\n';
-      text += '\uD83D\uDC65 Guests: '       + guests    + '\n';
-      if (occasion) text += '\uD83C\uDF89 Occasion: ' + occasion + '\n';
-      if (message)  text += '\uD83D\uDCAC Message: '  + message  + '\n';
-      text += '\n\u2192 Booking via official site: butterflyroyalvilla.com';
 
-      var waUrl = 'https://wa.me/212640015353?text=' + encodeURIComponent(text);
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
+      // 1 — Save to Firestore (silent, non-blocking)
+      try {
+        if (typeof firebase !== 'undefined' && firebase.apps.length) {
+          firebase.firestore().collection('reservations').add({
+            guestName: name,
+            phone:     phone,
+            checkIn:   checkin,
+            checkOut:  checkout,
+            guests:    guests,
+            occasion:  occasion,
+            message:   message,
+            source:    'website',
+            status:    'new',
+            notes:     '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(function (err) { console.warn('Firestore save failed:', err.message); });
+        }
+      } catch (err) { console.warn('Firestore unavailable:', err.message); }
+
+      // 2 — Send email notification via EmailJS (silent, non-blocking)
+      try {
+        if (typeof emailjs !== 'undefined'
+            && typeof EMAILJS_CONFIG !== 'undefined'
+            && EMAILJS_CONFIG.publicKey !== 'PASTE_YOUR_EMAILJS_PUBLIC_KEY') {
+          emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+            guest_name: name,
+            phone:      phone,
+            check_in:   checkin,
+            check_out:  checkout,
+            nights:     nights,
+            num_guests: guests,
+            occasion:   occasion || 'Not specified',
+            message:    message  || 'None',
+            to_email:   'villayellowbutterfly@gmail.com'
+          }).catch(function (err) { console.warn('EmailJS failed:', err); });
+        }
+      } catch (err) { console.warn('EmailJS unavailable:', err.message); }
+
+      // 3 — Open WhatsApp (always runs)
+      var text = 'Hello! I would like to book Villa Butterfly Marrakech.\n\n'
+        + '👤 Name: '     + name     + '\n'
+        + '📞 Phone: '    + phone    + '\n'
+        + '📅 Check-in: ' + checkin  + '\n'
+        + '📅 Check-out: '+ checkout + '\n'
+        + '🌙 Duration: ' + nights + ' night' + (nights > 1 ? 's' : '') + '\n'
+        + '👥 Guests: '   + guests   + '\n'
+        + (occasion ? '🎉 Occasion: ' + occasion + '\n' : '')
+        + (message  ? '💬 Message: '  + message  + '\n' : '')
+        + '\n→ Booking via official site: villayellowbutterfly.com';
+
+      window.open('https://wa.me/212640015353?text=' + encodeURIComponent(text),
+        '_blank', 'noopener,noreferrer');
     });
   }
 
+
+  /* ── FIREBASE DYNAMIC CONTENT ─────────────────── */
+  if (typeof firebase !== 'undefined' && firebase.apps.length) {
+    var _fbdb = firebase.firestore();
+    loadDynamicPricing(_fbdb);
+    loadAvailabilityCalendar(_fbdb);
+    loadActiveOffers(_fbdb);
+    loadExtraServices(_fbdb);
+  } else {
+    renderCalendarFallback();
+  }
+
 });
+
+
+/* ── DYNAMIC PRICING ────────────────────────────── */
+function loadDynamicPricing(db) {
+  db.collection('settings').doc('pricing').get().then(function (doc) {
+    if (!doc.exists) return;
+    var data = doc.data();
+    var map  = { low: 'price-low', high: 'price-high', peak: 'price-peak' };
+    Object.keys(map).forEach(function (k) {
+      if (!data[k] || !data[k].price) return;
+      var el = document.getElementById(map[k]);
+      if (!el) return;
+      var nightSpan = el.querySelector('span');
+      el.textContent = '€' + Number(data[k].price).toLocaleString('en-US');
+      if (nightSpan) el.appendChild(nightSpan);
+    });
+  }).catch(function () {});
+}
+
+
+/* ── ACTIVE OFFERS ──────────────────────────────── */
+function loadActiveOffers(db) {
+  db.collection('offers').where('active', '==', true).get().then(function (snap) {
+    if (snap.empty) return;
+    var section = document.getElementById('offers-section');
+    var grid    = document.getElementById('offers-grid');
+    var lang    = document.documentElement.lang || 'en';
+    var html    = '';
+
+    snap.forEach(function (doc) {
+      var d     = doc.data();
+      var title = (lang === 'fr' && d.titleFr) ? d.titleFr : (d.titleEn || '');
+      var desc  = (lang === 'fr' && d.descFr)  ? d.descFr  : (d.descEn  || '');
+      var period = (d.startDate && d.endDate)
+        ? d.startDate + ' — ' + d.endDate : '';
+
+      html += '<div class="offer-card animate-in">'
+        + (d.discount ? '<div class="offer-badge">-' + d.discount + '%</div>' : '')
+        + '<h3>' + _esc(title)  + '</h3>'
+        + (desc   ? '<p>'                       + _esc(desc)   + '</p>' : '')
+        + (period ? '<p class="offer-period">📅 ' + _esc(period) + '</p>' : '')
+        + '<a class="btn btn-gold" href="#booking">Book Now</a>'
+        + '</div>';
+    });
+
+    grid.innerHTML = html;
+    section.style.display = '';
+
+    document.querySelectorAll('.offer-card.animate-in').forEach(function (el) {
+      if (window._animObserver) window._animObserver.observe(el);
+    });
+  }).catch(function () {});
+}
+
+
+/* ── EXTRA SERVICES ─────────────────────────────── */
+function loadExtraServices(db) {
+  db.collection('services').where('active', '==', true)
+    .orderBy('createdAt', 'asc').get().then(function (snap) {
+      if (snap.empty) return;
+      var section = document.getElementById('extra-services-section');
+      var grid    = document.getElementById('extra-services-grid');
+      var lang    = document.documentElement.lang || 'en';
+      var html    = '';
+
+      snap.forEach(function (doc) {
+        var d    = doc.data();
+        var name = (lang === 'fr' && d.nameFr) ? d.nameFr : (d.nameEn || '');
+        var desc = (lang === 'fr' && d.descFr) ? d.descFr : (d.descEn || '');
+        html += '<div class="amenity-item animate-in">'
+          + '<div class="amenity-icon">' + (d.icon || '⭐') + '</div>'
+          + '<h4>'  + _esc(name) + '</h4>'
+          + '<p>'   + _esc(desc) + '</p>'
+          + '</div>';
+      });
+
+      grid.innerHTML = html;
+      section.style.display = '';
+    }).catch(function () {});
+}
+
+
+/* ── AVAILABILITY CALENDAR ──────────────────────── */
+function loadAvailabilityCalendar(db) {
+  db.collection('reservations')
+    .where('status', 'in', ['confirmed', 'awaiting_payment'])
+    .get()
+    .then(function (snap) {
+      var ranges = [];
+      snap.forEach(function (doc) {
+        var d = doc.data();
+        if (d.checkIn && d.checkOut) {
+          ranges.push({ checkIn: d.checkIn, checkOut: d.checkOut });
+        }
+      });
+      renderCalendar(ranges);
+    })
+    .catch(function () { renderCalendarFallback(); });
+}
+
+function renderCalendarFallback() {
+  renderCalendar([]);
+}
+
+function renderCalendar(bookedRanges) {
+  var container = document.getElementById('avail-calendar');
+  if (!container) return;
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var todayStr = _toDateStr(today);
+
+  var html = '<div class="cal-months">';
+  for (var m = 0; m < 3; m++) {
+    html += _buildMonth(today.getFullYear(), today.getMonth() + m, todayStr, bookedRanges);
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function _buildMonth(year, monthOffset, todayStr, bookedRanges) {
+  var date = new Date(year, monthOffset, 1);
+  var yr   = date.getFullYear();
+  var mo   = date.getMonth();
+  var monthNames = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+  var dayNames   = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+
+  var html = '<div class="cal-month">';
+  html += '<div class="cal-month-name">' + monthNames[mo] + ' ' + yr + '</div>';
+  html += '<div class="cal-grid">';
+  dayNames.forEach(function (d) { html += '<div class="cal-dow">' + d + '</div>'; });
+
+  var firstDay = (new Date(yr, mo, 1).getDay() + 6) % 7;
+  for (var i = 0; i < firstDay; i++) {
+    html += '<div class="cal-day cal-empty"></div>';
+  }
+
+  var daysInMonth = new Date(yr, mo + 1, 0).getDate();
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr  = yr + '-' + _pad2(mo + 1) + '-' + _pad2(d);
+    var isPast   = dateStr <  todayStr;
+    var isToday  = dateStr === todayStr;
+    var isBooked = _isDateBooked(dateStr, bookedRanges);
+
+    var cls = 'cal-day';
+    if (isPast)   cls += ' cal-past';
+    if (isToday)  cls += ' cal-today';
+    if (isBooked) cls += ' cal-booked';
+
+    html += '<div class="' + cls + '">' + d + '</div>';
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function _isDateBooked(dateStr, ranges) {
+  return ranges.some(function (r) {
+    return dateStr >= r.checkIn && dateStr < r.checkOut;
+  });
+}
+
+function _toDateStr(d) {
+  return d.getFullYear() + '-' + _pad2(d.getMonth() + 1) + '-' + _pad2(d.getDate());
+}
+
+function _pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+function _esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
