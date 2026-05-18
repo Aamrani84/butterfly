@@ -208,6 +208,9 @@
       justify-content: flex-end;
     }
     .portal-username { font-size: 0.85rem; color: var(--muted); }
+    .portal-lang { display: flex; align-items: center; gap: 0.35rem; }
+    .plang-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.55rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em; }
+    .plang-btn.active, .plang-btn:hover { background: var(--gold); color: var(--dark); border-color: var(--gold); }
 
     .role-badge {
       font-size: 0.72rem; font-weight: 700;
@@ -614,6 +617,11 @@
     <div class="portal-user">
       <span class="portal-username" id="portal-username"></span>
       <span class="role-badge" id="portal-role"></span>
+      <div class="portal-lang">
+        <button class="plang-btn active" id="plang-en" onclick="switchPortalLang('en')">EN</button>
+        <span style="color:rgba(255,255,255,0.2)">|</span>
+        <button class="plang-btn" id="plang-fr" onclick="switchPortalLang('fr')">FR</button>
+      </div>
       <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
     </div>
   </header>
@@ -926,6 +934,191 @@
    VILLA BUTTERFLY — Portal JavaScript
 ══════════════════════════════════════════════ */
 
+// ── Translations ──────────────────────────────
+let portalLang = 'en';
+const PT = {
+  en: {
+    'login.title':'Staff Portal','login.sub':'Authorised Access Only',
+    'login.email':'Email Address','login.pwd':'Password','login.btn':'Sign In',
+    'header.signout':'Sign Out',
+    'nav.res':'📋 Reservations','nav.add':'➕ Add Booking','nav.pricing':'💰 Pricing',
+    'nav.offers':'🎁 Offers','nav.services':'🛎 Services','nav.staff':'👥 Staff',
+    'stats.total':'Total','stats.new':'New','stats.await':'Awaiting Payment','stats.conf':'Confirmed',
+    'filter.all':'All','filter.new':'New','filter.nego':'Negotiation',
+    'filter.await':'Awaiting Payment','filter.conf':'Confirmed','filter.cancel':'Cancelled',
+    'search.ph':'Search by guest name or phone number…',
+    'res.checkin':'Check-in','res.checkout':'Check-out','res.duration':'Duration',
+    'res.guests':'Guests','res.occasion':'Occasion','res.phone':'Phone','res.email':'Email',
+    'res.message':'Guest Message','res.notes':'Internal Notes',
+    'res.notes.ph':'Add internal notes…','res.savenote':'Save Note','res.update':'Update',
+    'res.received':'Received','res.updated':'Updated','res.night':'night','res.nights':'nights',
+    'res.contract':'Contract Link (Google Drive)',
+    'res.contract.ph':'Paste Google Drive share link here…',
+    'res.contract.save':'Save','res.contract.wa':'📤 WhatsApp',
+    'status.new':'New Inquiry','status.negotiation':'In Negotiation',
+    'status.awaiting_payment':'Awaiting Payment','status.confirmed':'Confirmed ✓','status.cancelled':'Cancelled ✗',
+    'source.website':'Website','source.agency':'Agency','source.whatsapp':'WhatsApp','source.direct':'Direct',
+    'add.title':'Add External Reservation',
+    'add.sub':'Use this form to log a reservation received by phone, WhatsApp, or from an agency.',
+    'add.name':'Guest Full Name *','add.phone':'Phone / WhatsApp *','add.email':'Email (optional)',
+    'add.source':'Source *','add.src.ph':'Select source…','add.checkin':'Check-in Date *',
+    'add.checkout':'Check-out Date *','add.guests':'Number of Guests *','add.guests.ph':'Select…',
+    'add.occasion':'Occasion (optional)','add.occ.ph':'Select…','add.status':'Initial Status *',
+    'add.notes':'Internal Notes (optional)','add.notes.ph':'Agency name, negotiated price…',
+    'add.submit':'Add Reservation',
+    'src.agency':'Agency','src.wa':'WhatsApp Direct','src.direct':'Direct Call','src.web':'Website Form',
+    'pricing.title':'Pricing Management',
+    'pricing.sub':'Changes are saved instantly and reflected on the public website.',
+    'pricing.season':'Season Name','pricing.period':'Period','pricing.price':'Price per Night (€)',
+    'pricing.features':'Included Services (one per line)',
+    'pricing.hint':'Each line becomes a bullet point on the website.','pricing.save':'Save Changes',
+    'offers.title':'Special Offers','offers.sub':'Active offers are shown on the public website.',
+    'offers.add':'+ Add New Offer','offers.new':'➕ New Offer',
+    'offers.ten':'Title (English) *','offers.tfr':'Title (French)',
+    'offers.den':'Description (English)','offers.dfr':'Description (French)',
+    'offers.from':'Valid From','offers.to':'Valid Until','offers.disc':'Discount % (optional)',
+    'offers.save':'Save Offer','offers.cancel':'Cancel','offers.edit':'Edit','offers.del':'Delete',
+    'offers.active':'Active','offers.off':'Off',
+    'sv.title':'Extra Services',
+    'sv.sub':'Active services appear on the public website. Core amenities are always shown.',
+    'sv.add':'+ Add New Service','sv.new':'➕ New Service','sv.icon':'Icon (Emoji) *',
+    'sv.nen':'Name (English) *','sv.nfr':'Name (French)','sv.den':'Description (English)',
+    'sv.dfr':'Description (French)','sv.save':'Save Service','sv.cancel':'Cancel',
+    'sv.edit':'Edit','sv.del':'Delete','sv.active':'Active','sv.off':'Off',
+    'staff.title':'Staff Management',
+    'staff.sub':'Add staff members here after creating their account in Firebase Authentication.',
+    'staff.add':'+ Add New Staff Member','staff.new':'➕ Add Staff Member',
+    'staff.name':'Full Name *','staff.role':'Role *','staff.uid':'User UID *',
+    'staff.save':'Add Staff Member','staff.cancel':'Cancel','staff.remove':'Remove','staff.you':'(you)',
+    'role.admin':'👑 Admin','role.manager':'👤 Manager',
+    'empty.res':'No reservations found.','empty.offers':'No offers yet.',
+    'empty.sv':'No extra services yet.','empty.staff':'No staff members yet.',
+    'toast.status':'Status updated ✓','toast.note':'Note saved ✓',
+    'toast.contract':'Contract link saved ✓','toast.added':'Reservation added ✓',
+    'toast.err.fields':'Please fill in all required fields.',
+    'toast.err.dates':'Check-out must be after check-in.',
+    'toast.err.drive':'Please paste a Google Drive link first.',
+    'toast.err.uid':'Name and UID are required.',
+    'confirm.offer':'Delete this offer? This cannot be undone.',
+    'confirm.sv':'Delete this service? This cannot be undone.',
+    'confirm.staff':'Remove this staff member? They will no longer be able to log in.',
+    'occ.vacation':'Vacation / Holiday','occ.birthday':'Birthday Celebration',
+    'occ.wedding':'Wedding / Honeymoon','occ.corp':'Corporate Retreat','occ.other':'Other',
+    'status.sel.new':'New Inquiry','status.sel.nego':'In Negotiation',
+    'status.sel.await':'Awaiting Payment','status.sel.conf':'Confirmed ✓','status.sel.cancel':'Cancelled ✗'
+  },
+  fr: {
+    'login.title':'Portail du Personnel','login.sub':'Accès Autorisé Uniquement',
+    'login.email':'Adresse Email','login.pwd':'Mot de Passe','login.btn':'Se Connecter',
+    'header.signout':'Déconnexion',
+    'nav.res':'📋 Réservations','nav.add':'➕ Ajouter','nav.pricing':'💰 Tarifs',
+    'nav.offers':'🎁 Offres','nav.services':'🛎 Services','nav.staff':'👥 Personnel',
+    'stats.total':'Total','stats.new':'Nouvelles','stats.await':'Attente Paiement','stats.conf':'Confirmées',
+    'filter.all':'Tout','filter.new':'Nouvelle','filter.nego':'Négociation',
+    'filter.await':'Attente Paiement','filter.conf':'Confirmée','filter.cancel':'Annulée',
+    'search.ph':'Rechercher par nom ou téléphone…',
+    'res.checkin':'Arrivée','res.checkout':'Départ','res.duration':'Durée',
+    'res.guests':'Invités','res.occasion':'Occasion','res.phone':'Téléphone','res.email':'Email',
+    'res.message':'Message du Client','res.notes':'Notes Internes',
+    'res.notes.ph':'Ajouter des notes internes…','res.savenote':'Sauvegarder','res.update':'Mettre à Jour',
+    'res.received':'Reçue le','res.updated':'Modifiée le','res.night':'nuit','res.nights':'nuits',
+    'res.contract':'Lien Contrat (Google Drive)',
+    'res.contract.ph':'Coller le lien Google Drive ici…',
+    'res.contract.save':'Sauvegarder','res.contract.wa':'📤 WhatsApp',
+    'status.new':'Nouvelle Demande','status.negotiation':'En Négociation',
+    'status.awaiting_payment':'Attente Paiement','status.confirmed':'Confirmée ✓','status.cancelled':'Annulée ✗',
+    'source.website':'Site Web','source.agency':'Agence','source.whatsapp':'WhatsApp','source.direct':'Direct',
+    'add.title':'Ajouter une Réservation Externe',
+    'add.sub':'Utilisez ce formulaire pour enregistrer une réservation reçue par téléphone, WhatsApp ou agence.',
+    'add.name':'Nom Complet du Client *','add.phone':'Téléphone / WhatsApp *','add.email':'Email (facultatif)',
+    'add.source':'Source *','add.src.ph':'Sélectionner la source…','add.checkin':'Date d\'Arrivée *',
+    'add.checkout':'Date de Départ *','add.guests':'Nombre d\'Invités *','add.guests.ph':'Sélectionner…',
+    'add.occasion':'Occasion (facultatif)','add.occ.ph':'Sélectionner…','add.status':'Statut Initial *',
+    'add.notes':'Notes Internes (facultatif)','add.notes.ph':'Nom de l\'agence, prix négocié…',
+    'add.submit':'Ajouter la Réservation',
+    'src.agency':'Agence','src.wa':'WhatsApp Direct','src.direct':'Appel Direct','src.web':'Site Web',
+    'pricing.title':'Gestion des Tarifs',
+    'pricing.sub':'Les modifications sont enregistrées instantanément et visibles sur le site public.',
+    'pricing.season':'Nom de la Saison','pricing.period':'Période','pricing.price':'Prix par Nuit (€)',
+    'pricing.features':'Services Inclus (un par ligne)',
+    'pricing.hint':'Chaque ligne devient une puce sur le site web.','pricing.save':'Sauvegarder',
+    'offers.title':'Offres Spéciales','offers.sub':'Les offres actives apparaissent sur le site public.',
+    'offers.add':'+ Ajouter une Offre','offers.new':'➕ Nouvelle Offre',
+    'offers.ten':'Titre (Anglais) *','offers.tfr':'Titre (Français)',
+    'offers.den':'Description (Anglais)','offers.dfr':'Description (Français)',
+    'offers.from':'Valable Du','offers.to':'Valable Au','offers.disc':'Remise % (facultatif)',
+    'offers.save':'Sauvegarder l\'Offre','offers.cancel':'Annuler','offers.edit':'Modifier','offers.del':'Supprimer',
+    'offers.active':'Actif','offers.off':'Inactif',
+    'sv.title':'Services Supplémentaires',
+    'sv.sub':'Les services actifs apparaissent sur le site public. Les équipements de base sont toujours affichés.',
+    'sv.add':'+ Ajouter un Service','sv.new':'➕ Nouveau Service','sv.icon':'Icône (Emoji) *',
+    'sv.nen':'Nom (Anglais) *','sv.nfr':'Nom (Français)','sv.den':'Description (Anglais)',
+    'sv.dfr':'Description (Français)','sv.save':'Sauvegarder le Service','sv.cancel':'Annuler',
+    'sv.edit':'Modifier','sv.del':'Supprimer','sv.active':'Actif','sv.off':'Inactif',
+    'staff.title':'Gestion du Personnel',
+    'staff.sub':'Ajoutez les membres du personnel après avoir créé leur compte Firebase.',
+    'staff.add':'+ Ajouter un Membre','staff.new':'➕ Ajouter un Membre',
+    'staff.name':'Nom Complet *','staff.role':'Rôle *','staff.uid':'UID Utilisateur *',
+    'staff.save':'Ajouter','staff.cancel':'Annuler','staff.remove':'Supprimer','staff.you':'(vous)',
+    'role.admin':'👑 Admin','role.manager':'👤 Manager',
+    'empty.res':'Aucune réservation trouvée.','empty.offers':'Aucune offre pour le moment.',
+    'empty.sv':'Aucun service supplémentaire.','empty.staff':'Aucun membre du personnel.',
+    'toast.status':'Statut mis à jour ✓','toast.note':'Note sauvegardée ✓',
+    'toast.contract':'Lien contrat sauvegardé ✓','toast.added':'Réservation ajoutée ✓',
+    'toast.err.fields':'Veuillez remplir tous les champs obligatoires.',
+    'toast.err.dates':'La date de départ doit être après l\'arrivée.',
+    'toast.err.drive':'Veuillez coller un lien Google Drive d\'abord.',
+    'toast.err.uid':'Le nom et l\'UID sont obligatoires.',
+    'confirm.offer':'Supprimer cette offre ? Action irréversible.',
+    'confirm.sv':'Supprimer ce service ? Action irréversible.',
+    'confirm.staff':'Supprimer ce membre ? Il ne pourra plus se connecter au portail.',
+    'occ.vacation':'Vacances','occ.birthday':'Anniversaire',
+    'occ.wedding':'Mariage / Lune de miel','occ.corp':'Séminaire d\'entreprise','occ.other':'Autre',
+    'status.sel.new':'Nouvelle Demande','status.sel.nego':'En Négociation',
+    'status.sel.await':'Attente Paiement','status.sel.conf':'Confirmée ✓','status.sel.cancel':'Annulée ✗'
+  }
+};
+
+function T(key) { return (PT[portalLang] && PT[portalLang][key]) || PT.en[key] || key; }
+
+function switchPortalLang(lang) {
+  portalLang = lang;
+  document.getElementById('plang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('plang-fr').classList.toggle('active', lang === 'fr');
+  applyStaticTranslations();
+  // Re-render current tab content
+  const activeTab = document.querySelector('.nav-tab.active');
+  if (activeTab) activeTab.click();
+}
+
+function applyStaticTranslations() {
+  // Login
+  document.querySelector('#login-form label[for="login-email"]').textContent = T('login.email');
+  document.querySelector('#login-form label[for="login-password"]').textContent = T('login.pwd');
+  document.getElementById('login-btn').textContent = T('login.btn');
+  document.querySelector('.login-brand p').textContent = T('login.sub');
+  // Header
+  document.getElementById('logout-btn').textContent = T('header.signout');
+  // Nav tabs
+  document.querySelector('[data-tab="reservations"]').textContent = T('nav.res');
+  document.querySelector('[data-tab="add"]').textContent = T('nav.add');
+  document.querySelector('[data-tab="pricing"]').textContent = T('nav.pricing');
+  document.querySelector('[data-tab="offers"]').textContent = T('nav.offers');
+  document.querySelector('[data-tab="services"]').textContent = T('nav.services');
+  document.querySelector('[data-tab="staff"]').textContent = T('nav.staff');
+  // Stats labels
+  document.querySelectorAll('.stat-label')[0].textContent = T('stats.total');
+  document.querySelectorAll('.stat-label')[1].textContent = T('stats.new');
+  document.querySelectorAll('.stat-label')[2].textContent = T('stats.await');
+  document.querySelectorAll('.stat-label')[3].textContent = T('stats.conf');
+  // Search
+  document.getElementById('res-search').placeholder = T('search.ph');
+  // Filter buttons
+  const fbtns = document.querySelectorAll('.filter-btn');
+  const fkeys = ['filter.all','filter.new','filter.nego','filter.await','filter.conf','filter.cancel'];
+  fbtns.forEach((b,i) => { if (fkeys[i]) b.textContent = T(fkeys[i]); });
+}
+
 // ── State ─────────────────────────────────────
 let db;
 let currentUser  = null;
@@ -1040,6 +1233,7 @@ function showDashboard() {
     el.classList.toggle('hidden', currentRole !== 'admin');
   });
 
+  applyStaticTranslations();
   showTab('reservations');
   startResListener();
 }
@@ -1096,15 +1290,15 @@ function renderReservations(docs) {
 
   const list = document.getElementById('reservations-list');
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state">No reservations found.</div>';
+    list.innerHTML = '<div class="empty-state">' + T('empty.res') + '</div>';
     return;
   }
   list.innerHTML = filtered.map(d => buildResCard(d.id, d.data())).join('');
 }
 
 function buildResCard(id, d) {
-  const statusLabel = {new:'New Inquiry',negotiation:'In Negotiation',awaiting_payment:'Awaiting Payment',confirmed:'Confirmed ✓',cancelled:'Cancelled ✗'};
-  const sourceLabel = {website:'Website',agency:'Agency',whatsapp:'WhatsApp',direct:'Direct'};
+  const statusLabel = {new:T('status.new'),negotiation:T('status.negotiation'),awaiting_payment:T('status.awaiting_payment'),confirmed:T('status.confirmed'),cancelled:T('status.cancelled')};
+  const sourceLabel = {website:T('source.website'),agency:T('source.agency'),whatsapp:T('source.whatsapp'),direct:T('source.direct')};
   const nights = (d.checkIn && d.checkOut)
     ? Math.round((new Date(d.checkOut) - new Date(d.checkIn)) / 86400000) : '?';
 
@@ -1116,13 +1310,13 @@ function buildResCard(id, d) {
 
   const contractSection = d.status === 'confirmed' ? `
     <div class="res-contract">
-      <span class="res-info-label">Contract Link (Google Drive)</span>
+      <span class="res-info-label">${T('res.contract')}</span>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.4rem">
         <input type="text" id="contract-url-${id}"
           value="${esc(d.contractURL||'')}"
-          placeholder="Paste Google Drive share link here…"
+          placeholder="${T('res.contract.ph')}"
           class="notes-input" style="min-height:unset;padding:0.55rem 0.85rem;flex:1;min-width:180px" />
-        <button class="btn btn-gold btn-sm" onclick="saveContractLink('${id}')">Save</button>
+        <button class="btn btn-gold btn-sm" onclick="saveContractLink('${id}')">${T('res.contract.save')}</button>
         ${d.contractURL
           ? `<button class="btn btn-wa btn-sm" onclick="shareContractWA('${esc(cleanPhone)}','${esc(d.contractURL)}','${esc(d.guestName||'')}')">📤 WhatsApp</button>`
           : ''}
@@ -1140,44 +1334,44 @@ function buildResCard(id, d) {
     </div>
     <div class="res-body">
       <div class="res-info-grid">
-        <div class="res-info-item"><span class="res-info-label">Check-in</span><span>${d.checkIn||'—'}</span></div>
-        <div class="res-info-item"><span class="res-info-label">Check-out</span><span>${d.checkOut||'—'}</span></div>
-        <div class="res-info-item"><span class="res-info-label">Duration</span><span>${nights} night${nights!==1?'s':''}</span></div>
-        <div class="res-info-item"><span class="res-info-label">Guests</span><span>${d.guests||'—'}</span></div>
-        ${d.occasion?`<div class="res-info-item"><span class="res-info-label">Occasion</span><span>${esc(d.occasion)}</span></div>`:''}
+        <div class="res-info-item"><span class="res-info-label">${T('res.checkin')}</span><span>${d.checkIn||'—'}</span></div>
+        <div class="res-info-item"><span class="res-info-label">${T('res.checkout')}</span><span>${d.checkOut||'—'}</span></div>
+        <div class="res-info-item"><span class="res-info-label">${T('res.duration')}</span><span>${nights} ${nights!==1?T('res.nights'):T('res.night')}</span></div>
+        <div class="res-info-item"><span class="res-info-label">${T('res.guests')}</span><span>${d.guests||'—'}</span></div>
+        ${d.occasion?`<div class="res-info-item"><span class="res-info-label">${T('res.occasion')}</span><span>${esc(d.occasion)}</span></div>`:''}
         <div class="res-info-item">
-          <span class="res-info-label">Phone</span>
+          <span class="res-info-label">${T('res.phone')}</span>
           <a href="${waHref}" target="_blank" rel="noopener" class="phone-link">${esc(d.phone||'—')} ${cleanPhone?'<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>':''}
           </a>
         </div>
-        ${d.email?`<div class="res-info-item"><span class="res-info-label">Email</span><span>${esc(d.email)}</span></div>`:''}
+        ${d.email?`<div class="res-info-item"><span class="res-info-label">${T('res.email')}</span><span>${esc(d.email)}</span></div>`:''}
       </div>
 
-      ${d.message?`<div class="res-message"><span class="res-info-label">Guest Message</span><p>${esc(d.message)}</p></div>`:''}
+      ${d.message?`<div class="res-message"><span class="res-info-label">${T('res.message')}</span><p>${esc(d.message)}</p></div>`:''}
 
       <div class="res-notes">
-        <span class="res-info-label">Internal Notes</span>
-        <textarea id="notes-${id}" class="notes-input" rows="2" placeholder="Add internal notes…">${esc(d.notes||'')}</textarea>
-        <button class="btn btn-ghost btn-sm" style="align-self:flex-start" onclick="saveNote('${id}')">Save Note</button>
+        <span class="res-info-label">${T('res.notes')}</span>
+        <textarea id="notes-${id}" class="notes-input" rows="2" placeholder="${T('res.notes.ph')}">${esc(d.notes||'')}</textarea>
+        <button class="btn btn-ghost btn-sm" style="align-self:flex-start" onclick="saveNote('${id}')">${T('res.savenote')}</button>
       </div>
 
       <div class="res-actions">
         <div class="res-status-update">
           <select id="status-${id}" class="status-select">
-            <option value="new"              ${d.status==='new'             ?'selected':''}>New Inquiry</option>
-            <option value="negotiation"      ${d.status==='negotiation'     ?'selected':''}>In Negotiation</option>
-            <option value="awaiting_payment" ${d.status==='awaiting_payment'?'selected':''}>Awaiting Payment</option>
-            <option value="confirmed"        ${d.status==='confirmed'       ?'selected':''}>Confirmed ✓</option>
-            <option value="cancelled"        ${d.status==='cancelled'       ?'selected':''}>Cancelled ✗</option>
+            <option value="new"              ${d.status==='new'             ?'selected':''}>${T('status.sel.new')}</option>
+            <option value="negotiation"      ${d.status==='negotiation'     ?'selected':''}>${T('status.sel.nego')}</option>
+            <option value="awaiting_payment" ${d.status==='awaiting_payment'?'selected':''}>${T('status.sel.await')}</option>
+            <option value="confirmed"        ${d.status==='confirmed'       ?'selected':''}>${T('status.sel.conf')}</option>
+            <option value="cancelled"        ${d.status==='cancelled'       ?'selected':''}>${T('status.sel.cancel')}</option>
           </select>
-          <button class="btn btn-gold btn-sm" onclick="updateStatus('${id}')">Update</button>
+          <button class="btn btn-gold btn-sm" onclick="updateStatus('${id}')">${T('res.update')}</button>
         </div>
         ${contractSection}
       </div>
 
       <div class="res-footer">
-        <span class="res-timestamp">Received: ${fmtDate(d.createdAt)}</span>
-        ${d.updatedAt?`<span class="res-timestamp">Updated: ${fmtDate(d.updatedAt)}</span>`:''}
+        <span class="res-timestamp">${T('res.received')}: ${fmtDate(d.createdAt)}</span>
+        ${d.updatedAt?`<span class="res-timestamp">${T('res.updated')}: ${fmtDate(d.updatedAt)}</span>`:''}
       </div>
     </div>
   </div>`;
@@ -1192,7 +1386,7 @@ async function updateStatus(id) {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     await syncAvailability();
-    toast('Status updated ✓', 'success');
+    toast(T('toast.status'), 'success');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1220,7 +1414,7 @@ async function saveNote(id) {
       notes:     ta.value,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    toast('Note saved ✓', 'success');
+    toast(T('toast.note'), 'success');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1234,7 +1428,7 @@ async function saveContractLink(id) {
       contractURL: url,
       updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
     });
-    toast('Contract link saved ✓', 'success');
+    toast(T('toast.contract'), 'success');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1276,7 +1470,7 @@ async function handleAddReservation(e) {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     e.target.reset();
-    toast('Reservation added ✓', 'success');
+    toast(T('toast.added'), 'success');
     showTab('reservations');
   } catch(err) {
     toast('Error: ' + err.message, 'error');
