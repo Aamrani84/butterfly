@@ -429,7 +429,7 @@ function _buildMonth(year, monthOffset, todayStr, bookedRanges) {
   var mo   = date.getMonth();
   var monthNames = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
-  var dayNames   = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  var dayNames   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var html = '<div class="cal-month">';
   html += '<div class="cal-month-name">' + monthNames[mo] + ' ' + yr + '</div>';
