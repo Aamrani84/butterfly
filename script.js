@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', function () {
   window.switchLang = function (lang) {
     currentLang = lang;
     document.documentElement.lang = lang;
+    // Re-render calendar with correct language
+    if (typeof renderCalendar === 'function') {
+      renderCalendar(window._cachedRanges || []);
+    }
 
     document.querySelectorAll('[data-en], [data-fr]').forEach(function (el) {
       const val = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
@@ -398,12 +402,14 @@ function loadAvailabilityCalendar(db) {
   db.collection('settings').doc('availability').get()
     .then(function (doc) {
       var ranges = doc.exists ? (doc.data().ranges || []) : [];
+      window._cachedRanges = ranges;
       renderCalendar(ranges);
     })
     .catch(function () { renderCalendarFallback(); });
 }
 
 function renderCalendarFallback() {
+  window._cachedRanges = [];
   renderCalendar([]);
 }
 
@@ -427,9 +433,17 @@ function _buildMonth(year, monthOffset, todayStr, bookedRanges) {
   var date = new Date(year, monthOffset, 1);
   var yr   = date.getFullYear();
   var mo   = date.getMonth();
-  var monthNames = ['January','February','March','April','May','June',
-                    'July','August','September','October','November','December'];
-  var dayNames   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var lang = document.documentElement.lang || 'en';
+
+  var monthNames = lang === 'fr'
+    ? ['Janvier','Février','Mars','Avril','Mai','Juin',
+       'Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+    : ['January','February','March','April','May','June',
+       'July','August','September','October','November','December'];
+
+  var dayNames = lang === 'fr'
+    ? ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim']
+    : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var html = '<div class="cal-month">';
   html += '<div class="cal-month-name">' + monthNames[mo] + ' ' + yr + '</div>';
