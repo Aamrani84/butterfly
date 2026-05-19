@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   window.openPreviewLightbox = function (index) {
-    lbImages = previewImages;
+    lbImages = window._galleryImages || previewImages;
     showLightboxAt(index);
     openLightbox();
   };
@@ -310,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadAvailabilityCalendar(_fbdb);
     loadActiveOffers(_fbdb);
     loadExtraServices(_fbdb);
+    loadDynamicGallery(_fbdb);
   } else {
     renderCalendarFallback();
   }
@@ -396,6 +397,50 @@ function loadExtraServices(db) {
     }).catch(function () {});
 }
 
+
+/* ── DYNAMIC GALLERY ────────────────────────────── */
+function loadDynamicGallery(db) {
+  db.collection('settings').doc('gallery').get().then(function(snap) {
+    if (!snap.exists || !snap.data().images || !snap.data().images.length) return;
+    var images = snap.data().images;
+
+    // Update gallery preview mosaic (first 5 images)
+    var previewItems = document.querySelectorAll('#gallery-preview .gp-item');
+    previewItems.forEach(function(item, i) {
+      if (images[i]) {
+        item.style.backgroundImage = "url('" + images[i].url + "')";
+        item.setAttribute('data-index', i);
+      }
+    });
+
+    // Rebuild full gallery modal grid
+    var grid = document.getElementById('gallery-modal-grid');
+    if (grid) {
+      grid.innerHTML = images.map(function(img, i) {
+        return '<div class="gm-item" onclick="openModalLightbox(' + i + ')"'
+          + ' data-src="' + _esc(img.url) + '"'
+          + ' data-title="' + _esc(img.title || ('Photo ' + (i + 1))) + '"'
+          + ' style="background-image:url(\'' + _esc(img.url) + '\')"></div>';
+      }).join('');
+    }
+
+    // Update gallery count button
+    var btn = document.querySelector('.gallery-cta-row .btn');
+    if (btn) {
+      var lang = document.documentElement.lang || 'en';
+      btn.setAttribute('data-en', 'Open Full Gallery — ' + images.length + ' Photos');
+      btn.setAttribute('data-fr', 'Ouvrir la Galerie Complète — ' + images.length + ' Photos');
+      btn.textContent = lang === 'fr'
+        ? 'Ouvrir la Galerie Complète — ' + images.length + ' Photos'
+        : 'Open Full Gallery — ' + images.length + ' Photos';
+    }
+
+    // Update script preview images array for lightbox
+    window._galleryImages = images.map(function(img, i) {
+      return { src: img.url, title: img.title || ('Photo ' + (i + 1)) };
+    });
+  }).catch(function() {});
+}
 
 /* ── AVAILABILITY CALENDAR ──────────────────────── */
 function loadAvailabilityCalendar(db) {

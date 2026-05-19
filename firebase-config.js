@@ -18,6 +18,11 @@ const EMAILJS_CONFIG = {
   templateId: "template_no97k0t"
 };
 
+const CLOUDINARY_CONFIG = {
+  cloudName:    'dmrebgfdo',
+  uploadPreset: 'villa_butterfly'
+};
+
 // Initialise Firebase (skips silently if not yet configured)
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
   try {

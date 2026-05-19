@@ -558,7 +558,69 @@
     .toggle-label { font-size: 0.8rem; color: var(--muted); }
 
     /* ── RESPONSIVE ─────────────────────────────── */
+    /* Gallery tab */
+    .gallery-upload-zone {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.5rem; padding: 2rem 1rem;
+      border: 2px dashed rgba(201,168,76,0.4);
+      border-radius: var(--radius-lg);
+      cursor: pointer; margin-bottom: 1.5rem;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+    }
+    .gallery-upload-zone:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+    .gal-upload-icon { font-size: 2.5rem; }
+    #gal-upload-label { font-weight: 600; font-size: 1rem; color: var(--gold); }
+
+    .gal-progress-wrap {
+      height: 6px; background: rgba(255,255,255,0.1);
+      border-radius: 999px; overflow: hidden;
+    }
+    .gal-progress-bar {
+      height: 100%; background: var(--gold);
+      border-radius: 999px; width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .portal-gal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+    .portal-gal-item {
+      position: relative; border-radius: var(--radius);
+      overflow: hidden; aspect-ratio: 1;
+      background: var(--dark-soft);
+    }
+    .portal-gal-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block; transition: opacity 0.2s;
+    }
+    .portal-gal-item:hover img { opacity: 0.7; }
+    .portal-gal-delete {
+      position: absolute; top: 0.4rem; right: 0.4rem;
+      background: rgba(239,68,68,0.9);
+      border: none; border-radius: 50%;
+      width: 28px; height: 28px;
+      color: white; font-size: 1rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+      line-height: 1;
+    }
+    .portal-gal-item:hover .portal-gal-delete { opacity: 1; }
+    .portal-gal-title-input {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.6);
+      border: none; color: white;
+      font-size: 0.7rem; padding: 0.3rem 0.4rem;
+      width: 100%; font-family: inherit;
+      outline: none;
+    }
+
     @media (max-width: 600px) {
+      .portal-gal-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+      .portal-gal-delete { opacity: 1; }
+    }
       .stats-bar { grid-template-columns: repeat(2, 1fr); }
       .form-row-2 { grid-template-columns: 1fr; }
       .res-info-grid { grid-template-columns: 1fr 1fr; }
@@ -635,6 +697,7 @@
       <button class="nav-tab admin-only hidden" data-tab="offers"   onclick="showTab('offers')">🎁 Offers</button>
       <button class="nav-tab admin-only hidden" data-tab="services" onclick="showTab('services')">🛎 Services</button>
       <button class="nav-tab admin-only hidden" data-tab="staff"    onclick="showTab('staff')">👥 Staff</button>
+      <button class="nav-tab admin-only hidden" data-tab="gallery"  onclick="showTab('gallery')">🖼 Gallery</button>
     </div>
   </nav>
 
@@ -875,6 +938,33 @@
 
       <div class="items-list" id="services-list">
         <div class="loading-spinner">Loading services…</div>
+      </div>
+    </div>
+
+    <!-- ── TAB: GALLERY (admin) ─────────────────── -->
+    <div id="tab-gallery" class="tab-content">
+      <h2 class="section-title" id="gal-title">Gallery Management</h2>
+      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem" id="gal-sub">Upload photos from your phone or remove existing ones. Changes appear on the website instantly.</p>
+
+      <!-- Upload button -->
+      <label class="gallery-upload-zone" id="gal-upload-zone">
+        <input type="file" id="gal-file-input" accept="image/*" multiple style="display:none" onchange="handleGalleryUpload(this)">
+        <span class="gal-upload-icon">📸</span>
+        <span id="gal-upload-label">Tap to add photos</span>
+        <span style="font-size:0.8rem;color:var(--muted)">You can select multiple at once</span>
+      </label>
+
+      <!-- Upload progress -->
+      <div id="gal-progress" style="display:none;margin-bottom:1.25rem">
+        <div class="gal-progress-wrap">
+          <div class="gal-progress-bar" id="gal-progress-bar"></div>
+        </div>
+        <p id="gal-progress-text" style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem;text-align:center">Uploading…</p>
+      </div>
+
+      <!-- Image grid -->
+      <div class="portal-gal-grid" id="portal-gal-grid">
+        <div class="loading-spinner">Loading gallery…</div>
       </div>
     </div>
 
@@ -1249,6 +1339,7 @@ function showTab(name) {
   if (name === 'offers')   loadOffers();
   if (name === 'services') loadServices();
   if (name === 'staff')    loadStaff();
+  if (name === 'gallery')  loadGallery();
 }
 
 // ── Reservations ──────────────────────────────
@@ -1771,6 +1862,97 @@ function toast(msg, type) {
   el.className    = 'show' + (type ? ' ' + type : '');
   clearTimeout(el._t);
   el._t = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// ── Gallery Management ────────────────────────
+async function loadGallery() {
+  const grid = document.getElementById('portal-gal-grid');
+  grid.innerHTML = '<div class="loading-spinner">Loading…</div>';
+  try {
+    db.collection('settings').doc('gallery').onSnapshot(snap => {
+      const images = snap.exists ? (snap.data().images || []) : [];
+      if (!images.length) {
+        grid.innerHTML = '<div class="empty-state">No photos yet. Tap above to add your first photo.</div>';
+        return;
+      }
+      grid.innerHTML = images.map((img, i) => `
+        <div class="portal-gal-item">
+          <img src="${esc(img.url)}" alt="${esc(img.title||'')}" loading="lazy" />
+          <input type="text" class="portal-gal-title-input" value="${esc(img.title||'')}"
+            placeholder="Caption…" onchange="updateImageTitle(${i}, this.value)" />
+          <button class="portal-gal-delete" onclick="deleteGalleryImage(${i})" title="Remove">✕</button>
+        </div>`).join('');
+    });
+  } catch(e) { grid.innerHTML = `<p style="color:#f87171">Error: ${e.message}</p>`; }
+}
+
+async function handleGalleryUpload(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const progress    = document.getElementById('gal-progress');
+  const progressBar = document.getElementById('gal-progress-bar');
+  const progressTxt = document.getElementById('gal-progress-text');
+  const label       = document.getElementById('gal-upload-label');
+
+  progress.style.display = 'block';
+  label.textContent = 'Uploading…';
+
+  // Load existing images first
+  const snap = await db.collection('settings').doc('gallery').get();
+  const existing = snap.exists ? (snap.data().images || []) : [];
+  const newImages = [...existing];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    progressTxt.textContent = `Uploading photo ${i + 1} of ${files.length}…`;
+    progressBar.style.width = Math.round(((i) / files.length) * 100) + '%';
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'villa_butterfly');
+      formData.append('folder', 'villa-butterfly/gallery');
+
+      const res  = await fetch(`https://api.cloudinary.com/v1_1/dmrebgfdo/image/upload`, {
+        method: 'POST', body: formData
+      });
+      const data = await res.json();
+      if (data.secure_url) {
+        newImages.push({ url: data.secure_url, publicId: data.public_id, title: '' });
+      }
+    } catch(e) { console.warn('Upload failed for', file.name, e); }
+  }
+
+  progressBar.style.width = '100%';
+
+  await db.collection('settings').doc('gallery').set({ images: newImages });
+
+  progress.style.display = 'none';
+  progressBar.style.width = '0%';
+  label.textContent = 'Tap to add photos';
+  input.value = '';
+  toast('Photos uploaded ✓', 'success');
+}
+
+async function deleteGalleryImage(index) {
+  if (!confirm('Remove this photo from the gallery?')) return;
+  try {
+    const snap = await db.collection('settings').doc('gallery').get();
+    const images = snap.exists ? (snap.data().images || []) : [];
+    images.splice(index, 1);
+    await db.collection('settings').doc('gallery').set({ images });
+    toast('Photo removed ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function updateImageTitle(index, title) {
+  try {
+    const snap = await db.collection('settings').doc('gallery').get();
+    const images = snap.exists ? (snap.data().images || []) : [];
+    if (images[index]) images[index].title = title;
+    await db.collection('settings').doc('gallery').set({ images });
+  } catch(e) { console.warn('Title update failed:', e); }
 }
 
 // ── Staff Management ──────────────────────────
