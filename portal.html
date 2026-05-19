@@ -293,8 +293,10 @@
       background: var(--gold);
       border-radius: 0 0 3px 3px;
     }
-    .bnav-icon { font-size: 1.25rem; line-height: 1; }
-    .bnav-label { font-size: 0.55rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; }
+    .bnav-icon { font-size: 1.25rem; line-height: 1; transition: font-size 0.2s; }
+    .bnav-btn.active .bnav-icon { font-size: 1.1rem; }
+    .bnav-label { display: none; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; }
+    .bnav-btn.active .bnav-label { display: block; }
 
     /* ── PORTAL CONTENT ─────────────────────────── */
     .portal-content { flex: 1; padding: 1.25rem 1rem 90px; max-width: 900px; width: 100%; margin: 0 auto; }
@@ -675,8 +677,6 @@
     @media (max-width: 380px) {
       .stats-bar { grid-template-columns: repeat(2, 1fr); }
       .res-card-header { flex-direction: column; }
-      .bnav-label { display: none; }
-      .bnav-icon { font-size: 1.4rem; }
     }
   </style>
 </head>
