@@ -1063,8 +1063,7 @@
     <div id="tab-staff" class="tab-content">
       <h2 class="section-title">Staff Management</h2>
       <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem">
-        Add staff members here after creating their account in Firebase Authentication.
-        Each person logs into the portal with their own email and password.
+        Add a staff member using their name, email and role. They will be recognised automatically the first time they log in.
       </p>
 
       <!-- Add staff form -->
@@ -1084,8 +1083,8 @@
           </div>
         </div>
         <div class="form-field">
-          <label>User UID * <span style="color:var(--muted);font-weight:400;font-size:0.78rem">(copy from Firebase Console → Authentication → Users)</span></label>
-          <input type="text" id="st-uid" placeholder="e.g. abc123xyz789..." />
+          <label>Email Address *</label>
+          <input type="email" id="st-email" placeholder="e.g. manager@email.com" />
         </div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
           <button class="btn btn-gold btn-sm" onclick="saveStaff()">Add Staff Member</button>
@@ -1365,13 +1364,28 @@ async function handleAuthChange(user) {
 
   try {
     const snap = await db.collection('users').doc(user.uid).get();
+
     if (!snap.exists) {
-      await firebase.auth().signOut();
-      setLoginError('Account not configured. Contact the administrator.');
+      // Check for email-based invitation
+      const email = (user.email || '').toLowerCase();
+      const inv   = await db.collection('staffInvitations').doc(email).get();
+      if (inv.exists) {
+        const d = inv.data();
+        await db.collection('users').doc(user.uid).set({ name: d.name, role: d.role });
+        await db.collection('staffInvitations').doc(email).delete();
+        currentUser = user;
+        currentRole = d.role;
+        currentName = d.name;
+        showDashboard();
+      } else {
+        await firebase.auth().signOut();
+        setLoginError('Account not configured. Contact the administrator.');
+      }
       return;
     }
+
     currentUser = user;
-    currentRole = snap.data().role;   // 'admin' | 'manager'
+    currentRole = snap.data().role;
     currentName = snap.data().name || user.email;
     showDashboard();
   } catch (err) {
@@ -2131,7 +2145,7 @@ function toggleAddStaffForm(show) {
   document.getElementById('add-staff-form').classList.toggle('hidden', !show);
   document.getElementById('btn-add-staff').style.display = show ? 'none' : '';
   if (!show) {
-    ['st-name','st-uid'].forEach(id => { document.getElementById(id).value = ''; });
+    ['st-name','st-email'].forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('st-role').value = 'manager';
   }
 }
@@ -2140,40 +2154,63 @@ async function loadStaff() {
   const list = document.getElementById('staff-list');
   list.innerHTML = '<div class="loading-spinner">Loading…</div>';
   try {
-    db.collection('users').onSnapshot(snap => {
-      if (snap.empty) {
-        list.innerHTML = '<div class="empty-state">No staff members yet. Add the first one above.</div>';
-        return;
-      }
-      list.innerHTML = snap.docs.map(doc => {
-        const d = doc.data();
-        const roleLabel = d.role === 'admin' ? '👑 Admin' : '👤 Manager';
-        const roleClass = d.role === 'admin' ? 'role-admin' : 'role-manager';
-        return `
-        <div class="item-card">
-          <div class="item-card-body">
-            <div class="item-card-title">${esc(d.name || 'Unknown')}</div>
-            <div class="item-card-sub">UID: <span style="font-family:monospace;font-size:0.78rem">${doc.id}</span></div>
-          </div>
-          <div class="item-card-actions">
-            <span class="role-badge ${roleClass}">${roleLabel}</span>
-            ${doc.id !== currentUser.uid
-              ? `<button class="btn btn-danger btn-sm" onclick="removeStaff('${doc.id}')">Remove</button>`
-              : '<span style="color:var(--muted);font-size:0.78rem">(you)</span>'}
-          </div>
-        </div>`;
+    // Load active staff (linked accounts)
+    const usersSnap = await db.collection('users').get();
+    // Load pending invitations (not yet logged in)
+    const invSnap   = await db.collection('staffInvitations').get();
+
+    let html = '';
+
+    usersSnap.forEach(doc => {
+      const d = doc.data();
+      const roleLabel = d.role === 'admin' ? '👑 Admin' : '👤 Manager';
+      const roleClass = d.role === 'admin' ? 'role-admin' : 'role-manager';
+      html += `
+      <div class="item-card">
+        <div class="item-card-body">
+          <div class="item-card-title">${esc(d.name || 'Unknown')}</div>
+          <div class="item-card-sub" style="color:#6ee7b7">✓ Active</div>
+        </div>
+        <div class="item-card-actions">
+          <span class="role-badge ${roleClass}">${roleLabel}</span>
+          ${doc.id !== currentUser.uid
+            ? `<button class="btn btn-danger btn-sm" onclick="removeStaff('${doc.id}')">Remove</button>`
+            : '<span style="color:var(--muted);font-size:0.78rem">(you)</span>'}
+        </div>
+      </div>`;
+    });
+
+    invSnap.forEach(doc => {
+      const d = doc.data();
+      const roleLabel = d.role === 'admin' ? '👑 Admin' : '👤 Manager';
+      const roleClass = d.role === 'admin' ? 'role-admin' : 'role-manager';
+      html += `
+      <div class="item-card" style="opacity:0.7">
+        <div class="item-card-body">
+          <div class="item-card-title">${esc(d.name || 'Unknown')}</div>
+          <div class="item-card-sub">📧 ${esc(d.email)} — <span style="color:#fcd34d">Pending first login</span></div>
+        </div>
+        <div class="item-card-actions">
+          <span class="role-badge ${roleClass}">${roleLabel}</span>
+          <button class="btn btn-danger btn-sm" onclick="removeInvitation('${doc.id}')">Remove</button>
+        </div>
+      </div>`;
+    });
+
+    list.innerHTML = html || '<div class="empty-state">No staff members yet.</div>';
       }).join('');
     });
   } catch(e) { list.innerHTML = `<p style="color:#f87171">Error: ${e.message}</p>`; }
 }
 
 async function saveStaff() {
-  const name = document.getElementById('st-name').value.trim();
-  const role = document.getElementById('st-role').value;
-  const uid  = document.getElementById('st-uid').value.trim();
-  if (!name || !uid) { toast('Name and UID are required.', 'error'); return; }
+  const name  = document.getElementById('st-name').value.trim();
+  const role  = document.getElementById('st-role').value;
+  const email = document.getElementById('st-email').value.trim().toLowerCase();
+  if (!name || !email) { toast('Name and email are required.', 'error'); return; }
   try {
-    await db.collection('users').doc(uid).set({ name, role });
+    // Save by email — UID is linked automatically on first login
+    await db.collection('staffInvitations').doc(email).set({ name, role, email, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     toast('Staff member added ✓', 'success');
     toggleAddStaffForm(false);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
@@ -2184,6 +2221,16 @@ async function removeStaff(uid) {
   try {
     await db.collection('users').doc(uid).delete();
     toast('Staff member removed', 'success');
+    loadStaff();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function removeInvitation(email) {
+  if (!confirm('Remove this invitation?')) return;
+  try {
+    await db.collection('staffInvitations').doc(email).delete();
+    toast('Invitation removed', 'success');
+    loadStaff();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 </script>
