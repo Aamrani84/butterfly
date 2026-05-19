@@ -1466,22 +1466,36 @@ function showTab(name) {
 function startResListener() {
   if (resListener) resListener();
   resListener = db.collection('reservations')
-    .orderBy('createdAt', 'desc')
-    .onSnapshot(snap => renderReservations(snap.docs), err => console.error(err));
+    .onSnapshot(snap => {
+      // Sort newest first in JS — avoids needing a Firestore index
+      const sorted = snap.docs.slice().sort((a, b) => {
+        const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+        const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+        return bt - at;
+      });
+      renderReservations(sorted);
+    }, err => {
+      console.error('Reservations error:', err);
+      document.getElementById('reservations-list').innerHTML =
+        '<div class="empty-state" style="color:#f87171">Error: ' + err.message + '</div>';
+    });
 }
 
 function onSearch(val) {
   searchQuery = val.trim();
-  startResListener();
+  // Re-render from cached data without restarting the listener
+  if (window._cachedDocs) renderReservations(window._cachedDocs);
 }
 
 function setFilter(val, btn) {
   activeFilter = val;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  if (window._cachedDocs) renderReservations(window._cachedDocs);
 }
 
 function renderReservations(docs) {
+  window._cachedDocs = docs; // cache for search/filter re-renders
   const s = searchQuery.toLowerCase();
   let filtered = docs;
 
