@@ -2198,8 +2198,6 @@ async function loadStaff() {
     });
 
     list.innerHTML = html || '<div class="empty-state">No staff members yet.</div>';
-      }).join('');
-    });
   } catch(e) { list.innerHTML = `<p style="color:#f87171">Error: ${e.message}</p>`; }
 }
 
