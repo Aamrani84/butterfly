@@ -792,6 +792,13 @@
     <!-- ── TAB: RESERVATIONS ─────────────────── -->
     <div id="tab-reservations" class="tab-content active">
 
+      <!-- Refresh -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem">
+        <button class="btn btn-ghost btn-sm" onclick="startResListener()" style="gap:0.4rem">
+          🔄 <span id="refresh-label">Refresh</span>
+        </button>
+      </div>
+
       <!-- Stats -->
       <div class="stats-bar">
         <div class="stat-card">
@@ -1463,22 +1470,21 @@ function showTab(name) {
 }
 
 // ── Reservations ──────────────────────────────
-function startResListener() {
-  if (resListener) resListener();
-  resListener = db.collection('reservations')
-    .onSnapshot(snap => {
-      // Sort newest first in JS — avoids needing a Firestore index
-      const sorted = snap.docs.slice().sort((a, b) => {
-        const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
-        const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
-        return bt - at;
-      });
-      renderReservations(sorted);
-    }, err => {
-      console.error('Reservations error:', err);
-      document.getElementById('reservations-list').innerHTML =
-        '<div class="empty-state" style="color:#f87171">Error: ' + err.message + '</div>';
+async function startResListener() {
+  if (resListener) { resListener(); resListener = null; }
+  const list = document.getElementById('reservations-list');
+  list.innerHTML = '<div class="loading-spinner">Loading…</div>';
+  try {
+    const snap = await db.collection('reservations').get();
+    const sorted = snap.docs.slice().sort((a, b) => {
+      const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+      const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+      return bt - at;
     });
+    renderReservations(sorted);
+  } catch(err) {
+    list.innerHTML = '<div class="empty-state" style="color:#f87171">⚠️ ' + err.message + '</div>';
+  }
 }
 
 function onSearch(val) {
