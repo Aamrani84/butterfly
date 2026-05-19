@@ -1596,8 +1596,8 @@ async function updateStatus(id) {
       status:    sel.value,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    await syncAvailability();
     toast(T('toast.status'), 'success');
+    syncAvailability().catch(() => {}); // non-blocking
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1668,15 +1668,15 @@ async function handleAddReservation(e) {
     toast('Check-out must be after check-in.', 'error'); return;
   }
 
-  const btn = e.submitter;
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  const btn = document.querySelector('#add-res-form button[type="submit"]');
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
 
   try {
     await db.collection('reservations').add({
       guestName: name, phone, email, source,
       checkIn: checkin, checkOut: checkout,
       guests, occasion, status, notes,
-      addedBy:   currentUser.uid,
+      addedBy:   currentUser ? currentUser.uid : 'portal',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -1684,9 +1684,9 @@ async function handleAddReservation(e) {
     toast(T('toast.added'), 'success');
     showTab('reservations');
   } catch(err) {
-    toast('Error: ' + err.message, 'error');
+    toast('Error saving: ' + err.message, 'error');
   } finally {
-    btn.textContent = 'Add Reservation'; btn.disabled = false;
+    if (btn) { btn.textContent = T('add.submit') || 'Add Reservation'; btn.disabled = false; }
   }
 }
 
@@ -2018,15 +2018,28 @@ async function handleGalleryUpload(input) {
   progress.style.display = 'block';
   label.textContent = 'Uploading…';
 
+  let uploadedCount = 0;
+  let failedCount   = 0;
+
   // Load existing images first
-  const snap = await db.collection('settings').doc('gallery').get();
-  const existing = snap.exists ? (snap.data().images || []) : [];
+  let existing = [];
+  try {
+    const snap = await db.collection('settings').doc('gallery').get();
+    existing = snap.exists ? (snap.data().images || []) : [];
+  } catch(e) {
+    toast('Cannot read gallery: ' + e.message, 'error');
+    progress.style.display = 'none';
+    label.textContent = 'Tap to add photos';
+    input.value = '';
+    return;
+  }
+
   const newImages = [...existing];
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    progressTxt.textContent = `Uploading photo ${i + 1} of ${files.length}…`;
-    progressBar.style.width = Math.round(((i) / files.length) * 100) + '%';
+    progressTxt.textContent = 'Uploading photo ' + (i + 1) + ' of ' + files.length + '…';
+    progressBar.style.width = Math.round((i / files.length) * 100) + '%';
 
     try {
       const formData = new FormData();
@@ -2034,25 +2047,45 @@ async function handleGalleryUpload(input) {
       formData.append('upload_preset', 'villa_butterfly');
       formData.append('folder', 'villa-butterfly/gallery');
 
-      const res  = await fetch(`https://api.cloudinary.com/v1_1/dmrebgfdo/image/upload`, {
+      const res  = await fetch('https://api.cloudinary.com/v1_1/dmrebgfdo/image/upload', {
         method: 'POST', body: formData
       });
       const data = await res.json();
+
       if (data.secure_url) {
-        newImages.push({ url: data.secure_url, publicId: data.public_id, title: '' });
+        newImages.push({ url: data.secure_url, publicId: data.public_id || '', title: '' });
+        uploadedCount++;
+      } else if (data.error) {
+        failedCount++;
+        console.warn('Cloudinary error:', data.error.message);
       }
-    } catch(e) { console.warn('Upload failed for', file.name, e); }
+    } catch(err) {
+      failedCount++;
+      console.warn('Upload failed for', file.name, err);
+    }
   }
 
   progressBar.style.width = '100%';
 
-  await db.collection('settings').doc('gallery').set({ images: newImages });
+  if (uploadedCount > 0) {
+    try {
+      await db.collection('settings').doc('gallery').set({ images: newImages });
+      toast(uploadedCount + ' photo' + (uploadedCount > 1 ? 's' : '') + ' uploaded ✓', 'success');
+    } catch(err) {
+      toast('Firestore error: ' + err.message, 'error');
+    }
+  } else {
+    toast('Upload failed. Check Cloudinary preset name.', 'error');
+  }
+
+  if (failedCount > 0) {
+    toast(failedCount + ' photo(s) failed to upload', 'error');
+  }
 
   progress.style.display = 'none';
   progressBar.style.width = '0%';
   label.textContent = 'Tap to add photos';
   input.value = '';
-  toast('Photos uploaded ✓', 'success');
 }
 
 async function deleteGalleryImage(index) {
