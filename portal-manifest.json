@@ -8,18 +8,31 @@
   "background_color": "#0f0f0f",
   "theme_color": "#c9a84c",
   "orientation": "portrait",
+  "categories": ["business", "productivity"],
   "icons": [
+    {
+      "src": "/portal-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/portal-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
     {
       "src": "/logo_2-removebg-preview.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/logo_2-removebg-preview.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
