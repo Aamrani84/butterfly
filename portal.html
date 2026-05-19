@@ -1245,7 +1245,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   db = firebase.firestore();
 
-  firebase.auth().onAuthStateChanged(handleAuthChange);
+  // Keep session saved permanently on this device
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+    firebase.auth().onAuthStateChanged(handleAuthChange);
+  });
 
   document.getElementById('login-form').addEventListener('submit', handleLogin);
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
