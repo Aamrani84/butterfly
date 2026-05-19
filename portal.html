@@ -293,10 +293,9 @@
       background: var(--gold);
       border-radius: 0 0 3px 3px;
     }
-    .bnav-icon { font-size: 1.25rem; line-height: 1; transition: font-size 0.2s; }
-    .bnav-btn.active .bnav-icon { font-size: 1.1rem; }
-    .bnav-label { display: none; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; }
-    .bnav-btn.active .bnav-label { display: block; }
+    .bnav-icon { font-size: 1.5rem; line-height: 1; }
+    .bnav-label { display: none; }
+    .bnav-btn.active .bnav-icon { transform: scale(1.15); }
 
     /* ── PORTAL CONTENT ─────────────────────────── */
     .portal-content { flex: 1; padding: 1.25rem 1rem 90px; max-width: 900px; width: 100%; margin: 0 auto; }
@@ -1284,8 +1283,7 @@ function applyStaticTranslations() {
   document.querySelector('#login-form label[for="login-password"]').textContent = T('login.pwd');
   document.getElementById('login-btn').textContent = T('login.btn');
   document.querySelector('.login-brand p').textContent = T('login.sub');
-  // Header
-  document.getElementById('logout-btn').textContent = T('header.signout');
+  // Header — logout stays as icon, no text update needed
   // Bottom nav labels
   const bnav = {
     'bnav-res': T('filter.all') === 'Tout' ? 'Réserv.' : 'Reserv.',
