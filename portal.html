@@ -1279,10 +1279,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   db = firebase.firestore();
 
+  // Safety timeout — always show login if auth takes too long
+  const splashTimeout = setTimeout(() => showLogin(), 6000);
+
   // Keep session saved permanently on this device
-  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
-    firebase.auth().onAuthStateChanged(handleAuthChange);
-  });
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => firebase.auth().onAuthStateChanged(user => {
+      clearTimeout(splashTimeout);
+      handleAuthChange(user);
+    }))
+    .catch(() => firebase.auth().onAuthStateChanged(user => {
+      clearTimeout(splashTimeout);
+      handleAuthChange(user);
+    }));
 
   document.getElementById('login-form').addEventListener('submit', handleLogin);
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
