@@ -1,0 +1,25 @@
+{
+  "name": "Villa Butterfly — Staff Portal",
+  "short_name": "VB Portal",
+  "description": "Reservation management for Villa Butterfly Marrakech",
+  "start_url": "/portal.html",
+  "scope": "/portal.html",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#c9a84c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo_2-removebg-preview.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo_2-removebg-preview.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

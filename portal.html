@@ -6,6 +6,15 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>Staff Portal — Villa Butterfly</title>
 
+  <!-- PWA — portal only, not shown to public website visitors -->
+  <link rel="manifest" href="/portal-manifest.json" />
+  <meta name="theme-color" content="#c9a84c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="VB Portal" />
+  <link rel="apple-touch-icon" href="/logo_2-removebg-preview.png" />
+
   <!-- Firebase SDKs (compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -1023,6 +1032,11 @@
 /* ══════════════════════════════════════════════
    VILLA BUTTERFLY — Portal JavaScript
 ══════════════════════════════════════════════ */
+
+// ── Service Worker (PWA) ──────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/portal-sw.js').catch(() => {});
+}
 
 // ── Translations ──────────────────────────────
 let portalLang = 'en';
