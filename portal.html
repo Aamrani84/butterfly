@@ -607,6 +607,93 @@
     .toggle-label { font-size: 0.8rem; color: var(--muted); }
 
     /* ── RESPONSIVE ─────────────────────────────── */
+    /* ── Portal Calendar Tab ────────────────────── */
+    .pcal-legend {
+      display: flex; flex-wrap: wrap; gap: 0.6rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .pcal-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: rgba(255,255,255,0.7); }
+    .pcal-dot-lg { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .pcal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+      background: var(--dark-mid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.75rem;
+    }
+    .pcal-nav-btn {
+      background: var(--dark-soft); border: 1px solid var(--border);
+      color: var(--white); width: 36px; height: 36px;
+      border-radius: var(--radius-sm); font-size: 1.4rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .pcal-nav-btn:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+    .pcal-month-label { font-family: var(--ff-serif); font-size: 1.1rem; color: var(--white); font-weight: 600; }
+
+    .pcal-grid-wrap { margin-bottom: 1.25rem; }
+    .pcal-dow-row { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 3px; }
+    .pcal-dow { text-align: center; font-size: 0.62rem; font-weight: 700; color: var(--muted); padding: 4px 0; text-transform: uppercase; }
+    .pcal-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+
+    .pcal-day {
+      aspect-ratio: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; position: relative;
+      background: var(--dark-soft);
+      border: 1.5px solid transparent;
+      transition: border-color 0.15s, background 0.15s;
+      gap: 2px; padding: 2px;
+    }
+    .pcal-day:active { background: rgba(255,255,255,0.08); }
+    .pcal-day.pcal-empty { background: transparent; cursor: default; }
+    .pcal-day.pcal-today { border-color: var(--gold); color: var(--gold); font-weight: 700; }
+    .pcal-day.pcal-past  { opacity: 0.4; }
+    .pcal-day.pcal-has-res { background: rgba(255,255,255,0.04); }
+    .pcal-day.pcal-selected { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+
+    .pcal-dots-row { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+    .pcal-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Day detail panel */
+    .pcal-detail {
+      background: var(--dark-mid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .pcal-detail.hidden { display: none; }
+    .pcal-detail-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .pcal-detail-title { font-family: var(--ff-serif); font-size: 1rem; color: var(--white); font-weight: 600; }
+    .pcal-detail-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 1.1rem; cursor: pointer; padding: 0.2rem 0.4rem;
+      border-radius: var(--radius-sm); transition: color 0.2s;
+    }
+    .pcal-detail-close:hover { color: var(--white); }
+
+    .pcal-res-card {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .pcal-res-card:last-child { border-bottom: none; }
+    .pcal-res-stripe { width: 4px; border-radius: 2px; align-self: stretch; flex-shrink: 0; min-height: 48px; }
+    .pcal-res-body { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+    .pcal-res-name { font-weight: 600; font-size: 0.92rem; color: var(--white); }
+    .pcal-res-dates { font-size: 0.78rem; color: var(--muted); }
+    .pcal-res-meta  { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.2rem; }
+    .pcal-res-phone { font-size: 0.78rem; color: #86efac; text-decoration: underline; text-underline-offset: 2px; }
+
     /* Gallery tab */
     .gallery-upload-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -762,6 +849,10 @@
     <button class="bnav-btn" data-tab="add" onclick="showTab('add')">
       <span class="bnav-icon">➕</span>
       <span class="bnav-label" id="bnav-add">Add</span>
+    </button>
+    <button class="bnav-btn" data-tab="calendar" onclick="showTab('calendar')">
+      <span class="bnav-icon">📅</span>
+      <span class="bnav-label" id="bnav-cal">Calendar</span>
     </button>
     <button class="bnav-btn admin-only hidden" data-tab="pricing" onclick="showTab('pricing')">
       <span class="bnav-icon">💰</span>
@@ -1032,6 +1123,39 @@
       </div>
     </div>
 
+    <!-- ── TAB: CALENDAR ────────────────────────── -->
+    <div id="tab-calendar" class="tab-content">
+
+      <!-- Legend -->
+      <div class="pcal-legend">
+        <div class="pcal-legend-item"><span class="pcal-dot-lg" style="background:#10b981"></span><span id="leg-confirmed">Confirmed</span></div>
+        <div class="pcal-legend-item"><span class="pcal-dot-lg" style="background:#f59e0b"></span><span id="leg-awaiting">Awaiting Payment</span></div>
+        <div class="pcal-legend-item"><span class="pcal-dot-lg" style="background:#8b5cf6"></span><span id="leg-nego">Negotiation</span></div>
+        <div class="pcal-legend-item"><span class="pcal-dot-lg" style="background:#3b82f6"></span><span id="leg-new">New</span></div>
+      </div>
+
+      <!-- Month navigation -->
+      <div class="pcal-nav">
+        <button class="pcal-nav-btn" onclick="changeCalMonth(-1)">&#8249;</button>
+        <span class="pcal-month-label" id="pcal-month-label">—</span>
+        <button class="pcal-nav-btn" onclick="changeCalMonth(1)">&#8250;</button>
+      </div>
+
+      <!-- Calendar grid -->
+      <div id="pcal-grid" class="pcal-grid-wrap">
+        <div class="loading-spinner">Loading…</div>
+      </div>
+
+      <!-- Day detail panel (shown when a day is tapped) -->
+      <div id="pcal-detail" class="pcal-detail hidden">
+        <div class="pcal-detail-header">
+          <span id="pcal-detail-date" class="pcal-detail-title"></span>
+          <button class="pcal-detail-close" onclick="closeDayDetail()">✕</button>
+        </div>
+        <div id="pcal-detail-list"></div>
+      </div>
+    </div>
+
     <!-- ── TAB: GALLERY (admin) ─────────────────── -->
     <div id="tab-gallery" class="tab-content">
       <h2 class="section-title" id="gal-title">Gallery Management</h2>
@@ -1283,6 +1407,18 @@ function applyStaticTranslations() {
   document.getElementById('login-btn').textContent = T('login.btn');
   document.querySelector('.login-brand p').textContent = T('login.sub');
   // Header — logout stays as icon, no text update needed
+  // Calendar legend
+  const isFr = (portalLang === 'fr');
+  if (document.getElementById('leg-confirmed')) {
+    document.getElementById('leg-confirmed').textContent = isFr ? 'Confirmée'         : 'Confirmed';
+    document.getElementById('leg-awaiting').textContent  = isFr ? 'Attente Paiement'  : 'Awaiting Payment';
+    document.getElementById('leg-nego').textContent      = isFr ? 'Négociation'       : 'Negotiation';
+    document.getElementById('leg-new').textContent       = isFr ? 'Nouvelle Demande'  : 'New Inquiry';
+  }
+  // Re-render calendar if it is open
+  if (document.getElementById('tab-calendar').classList.contains('active') && pcalReservations.length !== undefined) {
+    renderPcal();
+  }
   // Bottom nav labels
   const bnav = {
     'bnav-res': T('filter.all') === 'Tout' ? 'Réserv.' : 'Reserv.',
@@ -1479,6 +1615,7 @@ function showTab(name) {
   if (name === 'services') loadServices();
   if (name === 'staff')    loadStaff();
   if (name === 'gallery')  loadGallery();
+  if (name === 'calendar') loadCalendarTab();
 }
 
 // ── Reservations ──────────────────────────────
@@ -2015,6 +2152,159 @@ function toast(msg, type) {
   clearTimeout(el._t);
   el._t = setTimeout(() => { el.className = ''; }, 3000);
 }
+
+// ── Portal Calendar ───────────────────────────
+let pcalYear, pcalMonth, pcalReservations = [];
+
+const STATUS_COLORS = {
+  confirmed:        '#10b981',
+  awaiting_payment: '#f59e0b',
+  negotiation:      '#8b5cf6',
+  new:              '#3b82f6'
+};
+const STATUS_PRIORITY = ['confirmed','awaiting_payment','negotiation','new'];
+
+const MONTH_NAMES_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_NAMES_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DAY_NAMES_EN   = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+const DAY_NAMES_FR   = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+
+async function loadCalendarTab() {
+  const today = new Date();
+  pcalYear  = today.getFullYear();
+  pcalMonth = today.getMonth();
+  pcalReservations = [];
+  document.getElementById('pcal-grid').innerHTML = '<div class="loading-spinner">Loading…</div>';
+  try {
+    const snap = await db.collection('reservations').get();
+    pcalReservations = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.status !== 'cancelled' && r.checkIn && r.checkOut);
+    renderPcal();
+  } catch(e) {
+    document.getElementById('pcal-grid').innerHTML = '<p style="color:#f87171">Error: ' + e.message + '</p>';
+  }
+}
+
+function changeCalMonth(dir) {
+  pcalMonth += dir;
+  if (pcalMonth > 11) { pcalMonth = 0; pcalYear++; }
+  if (pcalMonth < 0)  { pcalMonth = 11; pcalYear--; }
+  closeDayDetail();
+  renderPcal();
+}
+
+function renderPcal() {
+  const lang   = portalLang || 'en';
+  const mNames = lang === 'fr' ? MONTH_NAMES_FR : MONTH_NAMES_EN;
+  const dNames = lang === 'fr' ? DAY_NAMES_FR   : DAY_NAMES_EN;
+
+  document.getElementById('pcal-month-label').textContent = mNames[pcalMonth] + ' ' + pcalYear;
+
+  const today    = new Date(); today.setHours(0,0,0,0);
+  const todayStr = _pcalDateStr(today);
+  const firstDay = (new Date(pcalYear, pcalMonth, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(pcalYear, pcalMonth + 1, 0).getDate();
+
+  // DOW header
+  let html = '<div class="pcal-dow-row">';
+  dNames.forEach(d => { html += '<div class="pcal-dow">' + d + '</div>'; });
+  html += '</div><div class="pcal-days">';
+
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) html += '<div class="pcal-day pcal-empty"></div>';
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = pcalYear + '-' + _pc2(pcalMonth + 1) + '-' + _pc2(d);
+    const res     = pcalReservations.filter(r => dateStr >= r.checkIn && dateStr < r.checkOut);
+    const isToday = dateStr === todayStr;
+    const isPast  = dateStr < todayStr;
+
+    // Unique statuses sorted by priority
+    const statuses = STATUS_PRIORITY.filter(s => res.some(r => r.status === s));
+
+    let cls = 'pcal-day';
+    if (isPast)       cls += ' pcal-past';
+    if (isToday)      cls += ' pcal-today';
+    if (res.length)   cls += ' pcal-has-res';
+
+    const dots = statuses.map(s =>
+      '<div class="pcal-dot" style="background:' + STATUS_COLORS[s] + '"></div>'
+    ).join('');
+
+    html += '<div class="' + cls + '" onclick="showDayDetail(\'' + dateStr + '\')">'
+      + d
+      + (dots ? '<div class="pcal-dots-row">' + dots + '</div>' : '')
+      + '</div>';
+  }
+
+  html += '</div>';
+  document.getElementById('pcal-grid').innerHTML = html;
+}
+
+function showDayDetail(dateStr) {
+  const res = pcalReservations.filter(r => dateStr >= r.checkIn && dateStr < r.checkOut);
+
+  // Highlight selected day
+  document.querySelectorAll('.pcal-day').forEach(el => el.classList.remove('pcal-selected'));
+  const days = document.querySelectorAll('.pcal-day:not(.pcal-empty)');
+  const dayNum = parseInt(dateStr.split('-')[2]);
+  if (days[dayNum - 1]) days[dayNum - 1].classList.add('pcal-selected');
+
+  const detail = document.getElementById('pcal-detail');
+  const lang   = portalLang || 'en';
+
+  if (!res.length) {
+    detail.classList.add('hidden');
+    return;
+  }
+
+  // Format date label
+  const d = new Date(dateStr + 'T12:00:00');
+  const mNames = lang === 'fr' ? MONTH_NAMES_FR : MONTH_NAMES_EN;
+  const dateLabel = d.getDate() + ' ' + mNames[d.getMonth()] + ' ' + d.getFullYear();
+  document.getElementById('pcal-detail-date').textContent = dateLabel;
+
+  const statusLabels = {
+    confirmed:        lang === 'fr' ? 'Confirmée ✓'     : 'Confirmed ✓',
+    awaiting_payment: lang === 'fr' ? 'Attente Paiement' : 'Awaiting Payment',
+    negotiation:      lang === 'fr' ? 'En Négociation'   : 'In Negotiation',
+    new:              lang === 'fr' ? 'Nouvelle Demande'  : 'New Inquiry'
+  };
+
+  document.getElementById('pcal-detail-list').innerHTML = res.map(r => {
+    const nights = r.checkIn && r.checkOut
+      ? Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000) : '?';
+    const cleanPhone = (r.phone || '').replace(/[^0-9+]/g, '');
+    const color = STATUS_COLORS[r.status] || '#6b6b6b';
+    return '<div class="pcal-res-card">'
+      + '<div class="pcal-res-stripe" style="background:' + color + '"></div>'
+      + '<div class="pcal-res-body">'
+      + '<div class="pcal-res-name">' + esc(r.guestName || 'Unknown Guest') + '</div>'
+      + '<div class="pcal-res-dates">' + (r.checkIn||'?') + ' → ' + (r.checkOut||'?') + ' · ' + nights + (lang==='fr'?' nuit':'night') + (nights>1?'s':'') + '</div>'
+      + '<div class="pcal-res-meta">'
+      + '<span class="status-badge status-' + r.status + '">' + (statusLabels[r.status]||r.status) + '</span>'
+      + (r.guests ? '<span style="font-size:0.78rem;color:var(--muted)">👥 ' + esc(r.guests) + '</span>' : '')
+      + (r.occasion ? '<span style="font-size:0.78rem;color:var(--muted)">🎉 ' + esc(r.occasion) + '</span>' : '')
+      + '</div>'
+      + (cleanPhone ? '<a href="https://wa.me/' + cleanPhone.replace('+','') + '" target="_blank" class="pcal-res-phone">📞 ' + esc(r.phone) + '</a>' : '')
+      + '</div></div>';
+  }).join('');
+
+  detail.classList.remove('hidden');
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeDayDetail() {
+  document.getElementById('pcal-detail').classList.add('hidden');
+  document.querySelectorAll('.pcal-day').forEach(el => el.classList.remove('pcal-selected'));
+}
+
+function _pcalDateStr(d) {
+  return d.getFullYear() + '-' + _pc2(d.getMonth()+1) + '-' + _pc2(d.getDate());
+}
+function _pc2(n) { return n < 10 ? '0'+n : String(n); }
 
 // ── Gallery Management ────────────────────────
 async function loadGallery() {
