@@ -82,6 +82,7 @@
         <a href="#about" data-en="About" data-fr="À Propos">About</a>
         <a href="#rooms" data-en="Rooms" data-fr="Chambres">Rooms</a>
         <a href="#amenities" data-en="Amenities" data-fr="Équipements">Amenities</a>
+        <a href="#story" data-en="Our Story" data-fr="Notre Histoire">Our Story</a>
         <button class="nav-btn" type="button" onclick="openGallery()" data-en="Gallery" data-fr="Galerie">Gallery</button>
         <a href="#reviews" data-en="Reviews" data-fr="Avis">Reviews</a>
         <a href="#pricing" data-en="Pricing" data-fr="Tarifs">Pricing</a>
@@ -346,24 +347,64 @@
 
 
     <!-- ═══════════════════════════════════════════
-         VIDEO
+         ARCHITECTURE & STORY
     ═══════════════════════════════════════════ -->
-    <section class="section bg-cream">
+    <section id="story" class="section bg-dark">
       <div class="container">
-        <div class="section-header">
-          <p class="section-eyebrow" data-en="Virtual Tour" data-fr="Visite Virtuelle">Virtual Tour</p>
-          <h2 data-en="Experience the Villa" data-fr="Vivez la Villa">Experience the Villa</h2>
+
+        <div class="section-header light">
+          <p class="section-eyebrow" data-en="Architecture & Design" data-fr="Architecture & Design">Architecture & Design</p>
+          <h2 data-en="The Making of Villa Butterfly" data-fr="La Création de la Villa Butterfly">The Making of Villa Butterfly</h2>
+          <p class="section-sub light" data-en="A singular collaboration between architect Mohamed Amine Siana and Roche Bobois" data-fr="Une collaboration singulière entre l'architecte Mohamed Amine Siana et Roche Bobois">A singular collaboration between architect Mohamed Amine Siana and Roche Bobois</p>
         </div>
-        <div class="video-grid">
-          <video class="villa-video" controls preload="none" poster="marrakech-villa-butterfly-12.jpg">
-            <source src="WhatsApp Video 2026-04-06 at 01.49.08.mp4" type="video/mp4" />
-            <p data-en="Your browser does not support video playback." data-fr="Votre navigateur ne prend pas en charge la lecture vidéo.">Your browser does not support video playback.</p>
-          </video>
-          <video class="villa-video" controls preload="none" poster="marrakech-villa-butterfly-45.jpg">
-            <source src="WhatsApp Video 2026-04-06 at 01.49.09.mp4" type="video/mp4" />
-            <p data-en="Your browser does not support video playback." data-fr="Votre navigateur ne prend pas en charge la lecture vidéo.">Your browser does not support video playback.</p>
-          </video>
+
+        <!-- Official Documentary Video -->
+        <div class="story-video animate-in">
+          <iframe
+            src="https://www.youtube.com/embed/nB6VMKVan78?rel=0&modestbranding=1&color=white"
+            title="Villa Butterfly — Roche Bobois & Mohamed Amine Siana"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy">
+          </iframe>
         </div>
+
+        <!-- Story text + Credits -->
+        <div class="story-body">
+          <p class="story-text animate-in" data-en="Villa Butterfly was born from a singular creative vision — a collaboration between Moroccan architect Mohamed Amine Siana and the internationally acclaimed furniture house Roche Bobois. Drawing inspiration from the life cycle of the butterfly, every material was meticulously chosen: woodwork, stone, and concrete converge in perfect harmony, while Roche Bobois furniture — both inside and out — elevates this exceptional living environment into a true work of art." data-fr="La Villa Butterfly est née d'une vision créative singulière — une collaboration entre l'architecte marocain Mohamed Amine Siana et la maison de mobilier de renommée internationale Roche Bobois. S'inspirant du cycle de vie du papillon, chaque matériau a été méticuleusement sélectionné : boiseries, pierre et béton convergent en parfaite harmonie, tandis que le mobilier Roche Bobois — intérieur comme extérieur — élève cet environnement de vie exceptionnel au rang d'œuvre d'art.">Villa Butterfly was born from a singular creative vision — a collaboration between Moroccan architect Mohamed Amine Siana and the internationally acclaimed furniture house Roche Bobois. Drawing inspiration from the life cycle of the butterfly, every material was meticulously chosen: woodwork, stone, and concrete converge in perfect harmony, while Roche Bobois furniture — both inside and out — elevates this exceptional living environment into a true work of art.</p>
+
+          <div class="story-credits animate-in">
+            <div class="credit-item">
+              <span class="credit-label" data-en="Architecture" data-fr="Architecture">Architecture</span>
+              <span class="credit-name">Mohamed Amine Siana</span>
+            </div>
+            <div class="credit-sep"></div>
+            <div class="credit-item">
+              <span class="credit-label" data-en="Interior Design" data-fr="Design Intérieur">Interior Design</span>
+              <span class="credit-name">Jihane Bensaïd · Roche Bobois Marrakech</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Press Coverage -->
+        <div class="press-section animate-in">
+          <p class="press-label" data-en="As Featured In" data-fr="Vu Dans La Presse">As Featured In</p>
+          <div class="press-logos">
+            <a href="https://fr.le360.ma/societe/la-villa-butterfly-a-marrakech-lalliance-parfaite-entre-roche-bobois-et-larchitecte-mohamed-amine_RWX3YPH2TBBORBMK6GI76MY3QM/" target="_blank" rel="noopener noreferrer" class="press-item">
+              <span class="press-name">le360.ma</span>
+            </a>
+            <span class="press-dot">·</span>
+            <a href="https://maisonsdumaroc.com/interieurs/la-villa-butterfly-la-collab-dexception-entre-larchitecte-mohamed-amine-siana-et-roche-bobois" target="_blank" rel="noopener noreferrer" class="press-item">
+              <span class="press-name">Maisons du Maroc</span>
+            </a>
+            <span class="press-dot">·</span>
+            <a href="https://www.decoactuelle.ma/design-dexception-roche-bobois-et-siana-devoilent-villa-butterfly/" target="_blank" rel="noopener noreferrer" class="press-item">
+              <span class="press-name">Deco Actuelle</span>
+            </a>
+          </div>
+        </div>
+
       </div>
     </section>
 
